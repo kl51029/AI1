@@ -1,205 +1,134 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Atlas Brainrotów - AI1 LAB A</title>
+    <meta charset="UTF-8">
+    <title>AI1 LAB C</title>
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    
+    <style>
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        h1 { margin-bottom: 5px; }
+        .controls { margin-bottom: 25px; }
+        .controls button { padding: 10px 15px; margin-right: 15px; cursor: pointer; border: 1px solid #333; background-color: #f0f0f0; transition: background-color 0.2s; }
+        .controls button:hover { background-color: #ddd; }
 
-<script src="https://wi.arturk.pl/zen-style.js.php?styles[]=style-1&styles[]=style-2" defer></script>
+        #map { 
+            height: 300px; 
+            width: 600px; 
+            border: 2px solid #333; 
+            margin-bottom: 30px; 
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); 
+        }
+
+        .puzzle-area-main {
+            display: grid;
+            
+            grid-template-columns: 300px 600px 600px; 
+            gap: 20px;
+            width: 100%; 
+            max-width: 1540px; 
+            align-items: flex-start;
+        }
+
+        #map-reference {
+            width: 300px; 
+            height: 300px; 
+            border: 5px solid #0099cc; 
+            background-color: #eee;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); 
+        }
+
+        #puzzle-container {
+            width: 600px; 
+            height: 600px;
+            border: 5px solid #007bff;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-template-rows: repeat(4, 1fr);
+            background-color: #f0f0f0;
+            box-shadow: 0 0 15px rgba(0, 123, 255, 0.3);
+        }
+
+        #puzzle-pieces-pool-container {
+            width: 600px;
+        }
+        #puzzle-pieces-pool {
+            width: 600px; 
+            height: 600px;
+            border: 3px dashed #ccc;
+            padding: 0;
+            box-sizing: border-box;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-template-rows: repeat(4, 1fr);
+            background-color: #fafafa;
+        }
+
+        .puzzle-piece {
+            width: 100%;
+            height: 100%;
+            cursor: grab;
+            border: 1px solid rgba(0, 0, 0, 0.1); 
+            box-sizing: border-box;
+            box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
+        }
+        
+        .drop-target {
+            box-sizing: border-box;
+            background-color: #f8f8f8;
+            border: 1px dashed #ddd;
+            width: 100%;
+            height: 100%;
+        }
+        .correct-place {
+            background-color: #d4edda !important;
+        }
+    </style>
 </head>
 <body>
-  <header class="site-header" role="banner">
-    <div class="container">
-      <h1>Atlas Brainrotów</h1>
-      <p class="subtitle">Kieszonkowa encyklopedia rytmów, fraz i archetypów internetu</p>
 
-      <nav aria-label="Główne">
-        <ul class="nav">
-          <li><a href="#wprowadzenie">Wprowadzenie</a></li>
-          <li><a href="#zwierzęta">Brainroty Zwierzęce</a></li>
-          <li><a href="#przedmioty">Brainroty Przedmiotów</a></li>
-          <li><a href="#dźwięki">Brainroty Dźwiękonaśladowcze</a></li>
-          <li><a href="#top">Tier Lista Brainrotów</a></li>
-        </ul>
-      </nav>
+    <h1>LAB C: Puzzle Mapy</h1>
+
+    <div class="controls">
+        <button id="request-location">Moja lokalizacja</button>
+        <button id="request-notification-permission">Zgoda na Powiadomienia</button>
+        <button id="download-map">Pobierz mapę & Start Gry</button>
     </div>
-  </header>
-
-  <main id="main-content">
-    <!-- H2 #1 -->
-    <section id="wprowadzenie" class="section">
-      <div class="container">
-        <h2>Wprowadzenie</h2>
-        <!-- H3 #1 -->
-        <h3>Czym są Brainroty?</h3>
-        <p>
-          Brainrot to krótkie, często absurdalne fragmenty dźwięku, obrazu lub tekstu, które zostają w głowie bez żadnego powodu. Powtarzasz je, nucisz, oglądasz w kółko - i nawet nie wiesz, czemu to robisz. Właśnie w tym tkwi ich magia: są tak głupie, że aż genialne.
-          Można je podzielić na kilka rodzajów:
-                  <ul class="lista">
-          <li>🐊 Zwierzęce – taneczne stworzenia i memiczne bestie, np. Bombardilo Crocodilo czy Orangutini Ananasini.</li>
-          <li>🔥 Przedmiotowe – oparte na rzeczach lub technologiach, jak Pot Hotspot czy Skibidi Toilet.</li>
-          <li>🧍‍♂️ Postaciowe / NPC – ludzie i archetypy internetu: Sigma edits, Rizzler Raccoon, Fanum Tax.</li>
-          <li>🎵 Dźwiękonaśladowcze / muzyczne – rytmy bez sensu, które brzmią zbyt dobrze, by je ignorować, np. Tung Tung Tung Sahur czy Lirili Larila.</li>
-          <li>🌈 Absurdalne / surrealistyczne – totalny chaos bez kontekstu: Me When The..., Ohio memes, Gibble Gibble.</li>
-        </ul>
-        </p>
-        <!-- H3 #2 -->
-        <h3>Jak powstały Brainroty?</h3>
-        <p>
-          Brainroty narodziły się tam, gdzie internet traci sens, na styku TikToka, YouTube Shorts i memicznej kultury chaosu. Wszystko zaczęło się od krótkich, dziwnie zmontowanych filmików, które miały jedno zadanie: przyciągnąć uwagę choćby na trzy sekundy. Z czasem te losowe dźwięki, tańce i absurdalne postacie zaczęły tworzyć własny język internetu.
-          Pierwsze brainroty wyrosły z trendów takich jak Skibidi Toilet, Sigma edits czy NPC livestreamy, gdzie realizm ustąpił miejsca czystemu performansowi nonsensu. Twórcy zaczęli eksperymentować z rytmem, autotunem, dziwnymi słowami i przesadzonym montażem - aż powstała nowa forma rozrywki: coś pomiędzy memem, muzyką i halucynacją.
-          Dziś brainroty rozprzestrzeniają się szybciej niż same platformy, które je stworzyły. Każdy dźwięk, który wywoła uśmiech lub lekkie zażenowanie, może stać się kolejnym viralem. To cyfrowa ewolucja głupoty - ale też symptom współczesnej kultury, w której wszystko jest memem, a każdy mem ma szansę stać się legendą.
-        </p>
-      </div>
-    </section>
-
-    <!-- H2 #2 -->
-    <section id="Brainroty Zwierzęce" class="section alt">
-      <div class="container">
-        <h2> Brainroty Zwierzęce</h2>
-        <!-- H3 #3 -->
-        <h3>Bombardilo Crocodilo / Mewing Cat / Orangutini Ananasini / Rizzler Raccoon</h3>
-        <p>
-          To najczęstszy typ często z rytmicznym imieniem lub ruchem.
-        </p>
-        <div class="menu-brainrotów">
-          <figure class="card">
-            <img src="https://media.printables.com/media/prints/1224224/images/9178270_c3f5024a-ea2c-4655-a0fb-f4e0bf256783_10cf6be6-8ee2-43dd-b95e-82514e0f301c/thumbs/cover/800x800/jpeg/img_4257.jpg" alt="Wyobraź sobie tutaj Brainrota: Bombardilo Crocodilo" />
-            <figcaption>
-              <h4>Bombardilo Crocodilo</h4>
-              <p>Chaotyczny krokodyl, który tańczy jakby świat miał zaraz wybuchnąć.</p>
-            </figcaption>
-          </figure>
-          <figure class="card">
-            <img src="https://i.redd.it/guys-so-ive-been-doing-this-meowing-thing-recently-thats-v0-yzk7i5th81sc1.jpg?width=736&format=pjpg&auto=webp&s=8e17ae7c02932126ec653120175a25d179b06c4e" alt="Wyobraź sobie tutaj Brainrota: Mewing Cat" />
-            <figcaption>
-              <h4>Mewing Cat</h4>
-              <p>Kot filozof, który ćwiczy szczękę w imię estetyki i głupoty.</p>
-            </figcaption>
-          </figure>
-          <figure class="card">
-            <img src="https://static.wikitide.net/italianbrainrotwiki/thumb/7/7e/Orangutini_Ananasini_V2.jpg/300px-Orangutini_Ananasini_V2.jpg" alt="Wyobraź sobie tutaj Brainrota: Orangutini Ananasini" />
-            <figcaption>
-              <h4>Orangutini Ananasini</h4>
-              <p>Tropikalny orangutan z ananasową energią i wieczną imprezą w tle.</p>
-            </figcaption>
-          </figure>
-          <figure class="card">
-            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ6NqR-WIFU7mCwbMUY6QJ3xgJdUf0K7BupvbIheZwH5eLlT3AhHVNnQRZwoaSR1QruasE&usqp=CAU" alt="Wyobraź sobie tutaj Brainrota: Rizzler Raccoon" />
-            <figcaption>
-              <h4>Rizzler Raccoon</h4>
-              <p>Szop z niebezpiecznym poziomem charyzmy i ulicznego rizz.</p>
-            </figcaption>
-          </figure>
+    
+    <div id="map"></div>
+    
+    <div class="puzzle-area-main">
+        
+        <div id="map-reference-container">
+            <h2>Podgląd Mapy</h2>
+            <div id="map-reference">
+                <p style="padding: 10px;">Zdjęcie całej mapy (600x600px, przeskalowane) pojawi się po drugim kliknięciu.</p>
+            </div>
         </div>
-      </div>
-    </section>
 
-    <!-- H2 #3 -->
-    <section id="przedmioty" class="section">
-      <div class="container">
-        <h2>Brainroty Przedmiotów</h2>
-        <!-- H3 #4 -->
-        <h3>Pot Hotspot / Skibidi Toilet / iShowSpeed Microphone Brainrot / Fanum Tax</h3>
-        <p>
-        Brainroty oparte na rzeczach, technologii lub przypadkowych obiektach.
-        </p>
-        <div class="menu-brainrotów">
-          <figure class="card">
-            <img src="https://cdn.thingiverse.com/assets/72/84/43/cd/ff/large_display_obraz_2025-08-25_195214477.png" alt="Wyobraź sobie tutaj Brainrota: Pot Hotspot" />
-            <figcaption>
-              <h4>Pot Hotspot</h4>
-              <p>Internetowy garnek chaosu, w którym gotują się wszystkie memy naraz.</p>
-            </figcaption>
-          </figure>
-          <figure class="card">
-            <img src="https://upload.wikimedia.org/wikipedia/en/thumb/0/09/Skibidi_toilet_screenshot.webp/237px-Skibidi_toilet_screenshot.webp.png" alt="Wyobraź sobie tutaj Brainrota: Skibidi Toilet" />
-            <figcaption>
-              <h4>Skibidi Toilet</h4>
-              <p>Głowa w kiblu, ciało w rytmie, apokaliptyczna symfonia czystego absurdu.</p>
-            </figcaption>
-          </figure>
-          <figure class="card">
-            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSySFnovDVmgeeVokvCnyydZS4lj-RuskkszgWDiqKFyx4syQFcGcgECd55-ujxRTAUmbU&usqp=CAU" alt="Wyobraź sobie tutaj Brainrota: iShowSpeed Microphone Brainrot" />
-            <figcaption>
-              <h4>iShowSpeed Microphone Brainrot</h4>
-              <p>Mikrofon cierpi, publiczność szaleje, czysty chaos w decybelach i emocjach.</p>
-            </figcaption>
-          </figure>
-          <figure class="card">
-            <img src="https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/d8/ae/24/d8ae24d0-8d47-e7e1-cef1-ebffe034c55e/artwork.jpg/1200x630bb.jpg" alt="Wyobraź sobie tutaj Brainrota: Fanum Tax" />
-            <figcaption>
-              <h4>Fanum Tax</h4>
-              <p>Zjawisko ekonomiczne internetu: zawsze ktoś zje ci twoje jedzenie.</p>
-            </figcaption>
-          </figure>
+        <div>
+            <h2>Obszar do Układania</h2>
+            <div id="puzzle-container">
+                </div>
         </div>
-      </div>
-    </section>
-
-    <!-- H2 #4 -->
-    <section id="dźwięki" class="section alt">
-      <div class="container">
-        <h2>Brainroty Dźwiękonaśladowcze</h2>
-        <!-- H3 #5 -->
-        <h3>Tung Tung Tung Sahur / Tralalero Tralala / Lirili Larila / Skibidi Dop Dop Dop</h3>
-        <p>
-        Brainroty, które istnieją głównie jako rytm lub melodia.
-        </p>
-        <div class="menu-brainrotów">
-          <figure class="card">
-            <img src="https://i1.sndcdn.com/artworks-YDQOy2Pru5CA2rhs-x1uzgA-t1080x1080.jpg" alt="Wyobraź sobie tutaj Brainrota: Tung Tung Tung Sahur" />
-            <figcaption>
-              <h4>Tung Tung Tung Sahur</h4>
-              <p>Rytmiczny alarm rzeczywistości, który budzi memiczny instynkt o świcie.</p>
-            </figcaption>
-          </figure>
-          <figure class="card">
-            <img src="https://static.wikia.nocookie.net/characters/images/d/d1/Tralalero_Tralala.webp.png/revision/latest?cb=20250726144905" alt="Wyobraź sobie tutaj Brainrota: Tralalero Tralala" />
-            <figcaption>
-              <h4>Tralalero Tralala</h4>
-              <p>Wiecznie powtarzana melodia beztroskiego szaleństwa.</p>
-            </figcaption>
-          </figure>
-          <figure class="card">
-            <img src="https://static.catgame.top/github/1749719750491_b13764d4ce6df5b65ea1b10341e374a6_tplv-dy-resize-origshort-autoq-75_330.jpeg" alt="Wyobraź sobie tutaj Brainrota: Lirili Larila" />
-            <figcaption>
-              <h4>Lirili Larila</h4>
-              <p>Hipnotyczny śpiew z innego wymiaru, który nie chce wyjść z głowy.</p>
-            </figcaption>
-          </figure>
-          <figure class="card">
-            <img src="https://www.shazam.com/mkimage/image/thumb/Music211/v4/23/77/0b/23770ba0-49b7-bcd3-6e7c-a3de3337a889/859770384328_cover.jpg/1275x1275bb-60.webp" alt="Wyobraź sobie tutaj Brainrota: Skibidi Dop Dop Dop" />
-            <figcaption>
-              <h4>Skibidi Dop Dop Dop</h4>
-              <p>Pierwotny dźwięk internetu, mantra głupoty, która po prostu działa.</p>
-            </figcaption>
-          </figure>
+        
+        <div id="puzzle-pieces-pool-container">
+            <h2>Rozsypane Puzzle</h2>
+            <div id="puzzle-pieces-pool">
+                </div>
         </div>
-      </div>
-    </section>
-
-    <!-- H2 #5 -->
-    <section id="top" class="section">
-      <div class="container">
-        <h2>Tier Lista Brainrotów</h2>
-        <h3>Lista 5 najlepszych brainrotów</h3>
-        <ul class="lista">
-          <li>Nr 1. Bombardilo Crocodilo</li>
-          <li>Nr 2. Tung Tung Tung Sahur</li>
-          <li>Nr 3. Tralalero Tralala</li>
-          <li>Nr 4. Skibidi Toilet</li>
-          <li>Nr 5. Orangutini Ananasini</li>
-        </ul>
-      </div>
-    </section>
-  </main>
-
-  <footer id="footer" class="site-footer" role="contentinfo">
-    <div class="container">
-      <p><strong>Atlas Brainrotów (AI1 LAB A).</p>
-      <p>2025 - Atlas Brainrotów</p>
     </div>
-  </footer>
+
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet-image@0.4.0/leaflet-image.min.js"></script> 
+
+    <script src="script.js"></script>
 </body>
 </html>
